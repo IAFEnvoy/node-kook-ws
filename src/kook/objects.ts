@@ -1,5 +1,5 @@
 /**用户数据的抽象接口 */
-interface IUser {
+export interface IUser {
     /**用户的唯一id，可用来标记用户 */
     id: string,
     /**用户的名称 */
@@ -24,7 +24,7 @@ interface IUser {
     roles: Array<number>
 }
 /**服务器数据的抽象接口 */
-interface IGuild {
+export interface IGuild {
     /**服务器的唯一id，可用来标记服务器 */
     id: string,
     /**服务器名称 */
@@ -53,7 +53,7 @@ interface IGuild {
     channels: Array<number>
 }
 /**角色数据的抽象接口 */
-interface IRole {
+export interface IRole {
     /**角色的唯一id，可用来标记角色 */
     role_id: number,
     /**角色名称 */
@@ -70,7 +70,7 @@ interface IRole {
     permissions: number
 }
 /**频道数据的抽象接口 */
-interface IChannel {
+export interface IChannel {
     /**频道的唯一id，可用来标记频道 */
     id: string,
     /**频道名称 */
@@ -100,18 +100,18 @@ interface IChannel {
     /**是否有密码 */
     has_password: boolean
 }
-interface IRolePermissionOverwrite {
+export interface IRolePermissionOverwrite {
     role_id: number,
     allow: number,
     deny: number
 }
-interface IUserPermissionOverwrite {
+export interface IUserPermissionOverwrite {
     user: IUser,
     allow: number,
     deny: number
 }
 /**引用消息的抽象接口 */
-interface IQuote {
+export interface IQuote {
     /**引用消息的唯一id */
     id: string,
     /**引用消息类型 */
@@ -124,7 +124,7 @@ interface IQuote {
     author: IUser
 }
 /**附加的多媒体数据的抽象接口 */
-interface IAttachment {
+export interface IAttachment {
     /**多媒体类型 */
     type: string,
     /**多媒体地址 */

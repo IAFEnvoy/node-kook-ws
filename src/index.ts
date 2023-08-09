@@ -12,4 +12,4 @@ event.on('connected', () => console.log('机器人已连接到Kook服务器'));
 event.on('err', err => console.log(err));
 event.on('message', message => console.log(message));
 bot.connect();
-bot.rest.guild.list().then(json => console.log(json));
+bot.rest.channelUser.getJoinedChannel('8895014402422908', '2852054623').then(res => console.log(res));

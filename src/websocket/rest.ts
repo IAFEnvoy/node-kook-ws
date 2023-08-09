@@ -41,8 +41,6 @@ export class Rest {
     invite: Invite;
     /**黑名单相关接口 */
     blacklist: BlackList;
-    /**Badge相关接口 */
-    badge: Badge;
     /**在玩状态相关接口 */
     game: Game;
     /**OAuth2相关接口 */
@@ -66,7 +64,6 @@ export class Rest {
         this.guildEmoji = new GuildEmoji(this.webSocketClient);
         this.invite = new Invite(this.webSocketClient);
         this.blacklist = new BlackList(this.webSocketClient);
-        this.badge = new Badge(this.webSocketClient);
         this.game = new Game(this.webSocketClient);
         this.oauth2 = new OAuth2(this.webSocketClient);
     }
@@ -152,13 +149,9 @@ class GuildBoost {
      * @param end_time unix 时间戳，时间范围的结束时间
      * @returns 助力历史的列表
      */
-    history = async (guild_id: string, start_time?: number, end_time?: number): Promise<Array<{ user_id: number, guild_id: number, start_time: number, end_time: number, user: IUser }>> => {
-        let url = baseUrl + 'v3/guild-boost/history?guild_id=' + guild_id;
-        if (start_time != null) url += '&start_time=' + start_time;
-        if (end_time != null) url += '&end_time=' + end_time;
-        const json = await this.webSocketClient.axios(url);
-        return json.data.items;
-    }
+    history = async (guild_id: string, start_time?: number, end_time?: number): Promise<Array<{ user_id: number, guild_id: number, start_time: number, end_time: number, user: IUser }>> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-boost/history', 'GET', [['guild_id', guild_id], ['start_time', start_time?.toString()], ['end_time', end_time?.toString()]])
+            .then(json => json.data.items)
 }
 
 class Channel {
@@ -171,7 +164,7 @@ class Channel {
      * @returns 频道列表
      */
     list = (guild_id: string, type?: 1 | 2): Promise<Array<IChannel>> =>
-        this.webSocketClient.axios(baseUrl + 'v3/channel/list?guild_id=' + guild_id + '&type=' + type ?? 1)
+        this.webSocketClient.axios(baseUrl + 'v3/channel/list', 'GET', [['guild_id', guild_id], ['type', type?.toString()]])
             .then(json => json.data.items)
     /**
      * 获取频道详情
@@ -180,7 +173,7 @@ class Channel {
      * @returns 频道对象
      */
     view = (target_id: string, need_children?: boolean): Promise<IChannel> =>
-        this.webSocketClient.axios(baseUrl + 'v3/channel/view?target_id=' + target_id + '&need_children=' + need_children ?? false)
+        this.webSocketClient.axios(baseUrl + 'v3/channel/view', 'GET', [['target_id', target_id], ['need_children', need_children?.toString()]])
             .then(json => json.data)
     /**
      * 创建频道
@@ -236,7 +229,7 @@ class Channel {
      * @returns 用户对象列表
      */
     userList = (channel_id: string): Promise<Array<IUser>> =>
-        this.webSocketClient.axios(baseUrl + 'v3/channel/user-list?channel_id=' + channel_id)
+        this.webSocketClient.axios(baseUrl + 'v3/channel/user-list', 'GET', [['channel_id', channel_id]])
             .then(json => json.data)
     /**
      * 语音频道之间移动用户（Not complete yet）
@@ -264,7 +257,9 @@ class Message {
 class ChannelUser {
     private webSocketClient: WebSocketClient;
     constructor(webSocketClient: WebSocketClient) { this.webSocketClient = webSocketClient }
-
+    getJoinedChannel = (guild_id: string, user_id: string): Promise<Array<IChannel>> =>
+        this.webSocketClient.axios(baseUrl + 'v3/channel-user/get-joined-channel', 'GET', [['guild_id', guild_id], ['user_id', user_id]])
+            .then(json => json.data.items)
 }
 
 class UserChat {
@@ -288,7 +283,7 @@ class Gateway {
      * @returns 网关URL
      */
     index = async (compress: 0 | 1): Promise<string> =>
-        this.webSocketClient.axios(baseUrl + 'v3/gateway/index?compress=' + compress)
+        this.webSocketClient.axios(baseUrl + 'v3/gateway/index?', 'GET', [['compress', compress.toString()]])
             .then(json => json.data.url)
 }
 
@@ -329,12 +324,6 @@ class Invite {
 }
 
 class BlackList {
-    private webSocketClient: WebSocketClient;
-    constructor(webSocketClient: WebSocketClient) { this.webSocketClient = webSocketClient }
-
-}
-
-class Badge {
     private webSocketClient: WebSocketClient;
     constructor(webSocketClient: WebSocketClient) { this.webSocketClient = webSocketClient }
 

@@ -30,7 +30,7 @@ export class WebSocketClient {
      * 封装好的请求方法，可直接使用当前token进行请求
      * @param url 请求的url
      * @param method 请求方式，默认为GET
-     * @param body POST请求的附加Form数据
+     * @param data 如果为GET则为query数据，如果为POST则为form数据
      * @returns 请求到的JSON
      */
     axios = async (url: string, method?: 'GET' | 'POST', data?: Array<Array<string | undefined>>) => {
@@ -45,11 +45,19 @@ export class WebSocketClient {
                 headers: { Authorization: 'Bot ' + this.token },
                 body: form
             }).then(res => res.json())
-        } else
+        } else {
+            if (data != null)
+                url += '?' + data?.reduce((p, c) => {
+                    if (c[0] != null && c[1] != null)
+                        p.push(c[0] + '=' + c[1]);
+                    return p;
+                }, []).join('&');
             return await fetch(url, {
                 method: 'GET',
                 headers: { Authorization: 'Bot ' + this.token }
             }).then(res => res.json())
+        }
     }
+    /**连接机器人的WebSocket */
     connect = () => this.websocket.connect()
 }

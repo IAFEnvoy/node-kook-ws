@@ -78,7 +78,7 @@ export class MessageWebsocket {
                 }
             })
         });
-        this.socket.on('connectFailed', async _ => {
+        this.socket.on('connectFailed', async () => {
             if (retryCount == 2) {
                 this.logger.emit('error', '连接文字WebSocket失败，并且重连超过两次，重新获取Gateway');
                 ws_url = await this.rest.gateway.index(0);

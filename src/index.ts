@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { Rest } from "./websocket/rest";
 import { MessageWebsocket } from "./websocket/websocket";
 import { WebSocketClient } from "./websocket/client";
+import { Permission } from "./kook/reference";
 
 const token = '1/MTYxNTI=/eCOnIAGXnYFzW7B6zlGhdw=='
 let logger = new EventEmitter(), event = new EventEmitter();

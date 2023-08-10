@@ -1,5 +1,5 @@
-import { IChannel, IGuild, IUser } from "../kook/objects";
-import { UserList } from "../kook/response";
+import { IChannel, IGuild, IRole, IUser } from "../kook/objects";
+import { RoleChange, UserEx, UserList, UserMe } from "../kook/response";
 import { WebSocketClient } from "./client";
 
 const baseUrl = "https://www.kookapp.cn/api/";
@@ -99,18 +99,10 @@ class Guild {
      * @param filter_user_id 获取指定 id 所属用户的信息
      * @returns 用户列表对象，包括用户数据和在线情况
      */
-    user_list = async (guild_id: string, channel_id?: string, search?: string, role_id?: string, mobile_verified?: 0 | 1, active_time?: 0 | 1, joined_at?: 0 | 1, filter_user_id?: string): Promise<UserList> => {
-        let url = baseUrl + 'v3/guild/user-list?guild_id=' + guild_id;
-        if (channel_id != null) url += '&channel_id=' + channel_id;
-        if (search != null) url += '&search=' + search;
-        if (role_id != null) url += '&role_id=' + role_id;
-        if (mobile_verified != null) url += '&mobile_verified=' + mobile_verified;
-        if (active_time != null) url += '&active_time=' + active_time;
-        if (joined_at != null) url += '&joined_at=' + joined_at;
-        if (filter_user_id != null) url += '&filter_user_id=' + filter_user_id;
-        const json = await this.webSocketClient.axios(url);
-        return json.data;
-    }
+    user_list = async (guild_id: string, channel_id?: string, search?: string, role_id?: string, mobile_verified?: 0 | 1, active_time?: 0 | 1, joined_at?: 0 | 1, filter_user_id?: string): Promise<UserList> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild/user-list', 'GET', [['guild_id', guild_id], ['channel_id', channel_id], ['search', search], ['role_id', role_id], ['mobile_verified', mobile_verified?.toString()], ['active_time', active_time?.toString()], ['joined_at', joined_at?.toString()], ['filter_user_id', filter_user_id]])
+            .then(json => json.data)
+
     /**
      * 修改服务器中用户的昵称
      * @param guild_id 服务器唯一id
@@ -290,7 +282,28 @@ class Gateway {
 class User {
     private webSocketClient: WebSocketClient;
     constructor(webSocketClient: WebSocketClient) { this.webSocketClient = webSocketClient }
-
+    /**
+     * 获取当前用户信息
+     * @returns UserMe对象
+     */
+    me = (): Promise<UserMe> =>
+        this.webSocketClient.axios(baseUrl + 'v3/user/me')
+            .then(json => json.data)
+    /**
+     * 获取目标用户信息
+     * @param user_id 用户唯一id
+     * @param guild_id 服务器唯一id
+     * @returns UserEx对象
+     */
+    view = (user_id: string, guild_id?: string): Promise<UserEx> =>
+        this.webSocketClient.axios(baseUrl + 'v3/user/view', 'GET', [['user_id', user_id], ['guild_id', guild_id]])
+            .then(json => json.data)
+    /**下线机器人
+     * 
+     * 别问我为什么没数据也要POST，KOOK的文档这么写的
+     */
+    offline = (): Promise<void> =>
+        this.webSocketClient.axios(baseUrl + 'v3/user/offline', 'POST')
 }
 
 class Asset {
@@ -302,7 +315,64 @@ class Asset {
 class GuildRole {
     private webSocketClient: WebSocketClient;
     constructor(webSocketClient: WebSocketClient) { this.webSocketClient = webSocketClient }
-
+    /**
+     * 获取服务器角色列表
+     * @param guild_id 服务器唯一id
+     * @returns 角色列表
+     */
+    list = (guild_id: string): Promise<Array<IRole>> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/list', 'GET', [['guild_id', guild_id]])
+            .then(json => json.data.items)
+    /**
+     * 创建服务器角色
+     * @param guild_id 服务器唯一id
+     * @param name 如果不写，则为"新角色"
+     * @returns 新建的角色对象
+     */
+    create = (guild_id: string, name?: string): Promise<IRole> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/create', 'POST', [['guild_id', guild_id], ['name', name]])
+            .then(json => json.data[0])
+    /**
+     * 更新服务器角色
+     * @param guild_id 服务器唯一id
+     * @param role_id 角色唯一id
+     * @param name 角色名称
+     * @param color 颜色
+     * @param hoist 只能为 0 或者 1，是否把该角色的用户在用户列表排到前面
+     * @param mentionable 只能为 0 或者 1，该角色是否可以被提及
+     * @param permissions 权限
+     * @returns 修改后的角色对象
+     */
+    update = (guild_id: string, role_id: number, name?: string, color?: number, hoist?: 0 | 1, mentionable?: 0 | 1, permissions?: number): Promise<IRole> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/update', 'POST', [['guild_id', guild_id], ['role_id', role_id.toString()], ['name', name], ['color', color?.toString()], ['hoist', hoist?.toString()], ['mentionable', mentionable?.toString()], ['permissions', permissions?.toString()]])
+            .then(json => json.data[0])
+    /**
+     * 删除服务器角色
+     * @param guild_id 服务器唯一id
+     * @param role_id 角色唯一id
+     */
+    delete = (guild_id: string, role_id: number): Promise<void> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/delete', 'POST', [['guild_id', guild_id], ['role_id', role_id.toString()]])
+    /**
+     * 赋予用户角色
+     * @param guild_id 服务器唯一id
+     * @param user_id 用户唯一id
+     * @param role_id 角色唯一id
+     * @returns 修改后的用户身份组
+     */
+    grant = (guild_id: string, user_id: string, role_id: number): Promise<RoleChange> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/grant', 'POST', [['guild_id', guild_id], ['user_id', user_id], ['role_id', role_id.toString()]])
+            .then(json => json.data)
+    /**
+     * 删除用户角色
+     * @param guild_id 服务器唯一id
+     * @param user_id 用户唯一id
+     * @param role_id 角色唯一id
+     * @returns 修改后的用户身份组
+     */
+    revoke = (guild_id: string, user_id: string, role_id: number): Promise<RoleChange> =>
+        this.webSocketClient.axios(baseUrl + 'v3/guild-role/revoke', 'POST', [['guild_id', guild_id], ['user_id', user_id], ['role_id', role_id.toString()]])
+            .then(json => json.data)
 }
 
 class Intimacy {

@@ -110,6 +110,23 @@ export interface IUserPermissionOverwrite {
     allow: number,
     deny: number
 }
+/**角色数据的抽象接口 */
+export interface IRole {
+    /**角色唯一id，可用来标记角色 */
+    role_id: number,
+    /**角色的名称 */
+    name: string,
+    /**角色的色值 0x000000 - 0xFFFFFF */
+    color: number,
+    /**顺序，值越小载靠前 */
+    position: number,
+    /**只能为 0 或者 1，是否把该角色的用户在用户列表排到前面 */
+    hoist: 0 | 1,
+    /**只能为 0 或者 1，该角色是否可以被提及 */
+    mentionable: 0 | 1,
+    /**权限 */
+    permissions: number
+}
 /**引用消息的抽象接口 */
 export interface IQuote {
     /**引用消息的唯一id */

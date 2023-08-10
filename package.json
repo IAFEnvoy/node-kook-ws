@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/events": "^3.0.0",
-    "@types/websocket": "^1.0.5"
+    "@types/websocket": "^1.0.5",
+    "typescript": "^5.1.6"
   }
 }
